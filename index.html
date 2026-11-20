@@ -88,6 +88,26 @@
       <p>Review sales activity and team performance.</p>
     </div>
   </main>
+  
+<section id="loginSection" class="card">
+  <h2>Thomas Tire Commercial CRM Login</h2>
+  <p>Sign in to access your sales dashboard.</p>
+
+  <form id="loginForm">
+    <label for="loginEmail">Email Address</label><br>
+    <input type="email" id="loginEmail"
+           placeholder="Work email" required><br><br>
+
+    <label for="loginPassword">Password</label><br>
+    <input type="password" id="loginPassword"
+           placeholder="Password" required><br><br>
+
+    <button type="submit">Sign In</button>
+  </form>
+
+  <p id="loginMessage" role="status"></p>
+</section>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <script>
   const SUPABASE_URL = "https://cbpjovnabqettydgwkem.supabase.co";
