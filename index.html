@@ -46,7 +46,7 @@
 
  <main id="crmDashboard" style="display: none;">
     <h2>Sales Dashboard</h2>
-   
+   <button type="button" id="logoutButton">Log Out</button>
 <div class="card" onclick="document.getElementById('salesForm').hidden = false" style="cursor:pointer;">
   <h2>Daily Sales Activity →</h2>
   <p>Click here to record customer visits and phone calls.</p>
@@ -149,7 +149,18 @@ db.auth.getSession().then(({ data: { session } }) => {
   document.getElementById("crmDashboard").style.display =
     session ? "block" : "none";
 });
+document.getElementById("logoutButton").addEventListener("click", async () => {
+  const { error } = await db.auth.signOut();
 
+  if (error) {
+    alert("Could not log out: " + error.message);
+    return;
+  }
+
+  document.getElementById("crmDashboard").style.display = "none";
+  document.getElementById("loginForm").reset();
+  loginMessage.textContent = "You have successfully logged out.";
+});
 </script>
 
 
