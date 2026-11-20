@@ -44,7 +44,7 @@
     <p>COMMERCIAL CRM</p>
   </header>
 
-  <main>
+ <main id="crmDashboard" style="display: none;">
     <h2>Sales Dashboard</h2>
    
 <div class="card" onclick="document.getElementById('salesForm').hidden = false" style="cursor:pointer;">
@@ -143,8 +143,12 @@ loginForm.addEventListener("submit", async (event) => {
   }
 
   loginMessage.textContent = "Successfully signed in!";
+  document.getElementById("crmDashboard").style.display = "block";
 });
-
+db.auth.getSession().then(({ data: { session } }) => {
+  document.getElementById("crmDashboard").style.display =
+    session ? "block" : "none";
+});
 
 </script>
 
