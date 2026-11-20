@@ -179,12 +179,29 @@ document.getElementById("logoutButton").addEventListener("click", async () => {
     return;
   }
 
- const { data: customers, error: lookupError } = await db
-  .from("customer_accounts")
-  .select("id")
-  .eq("business_name", customerName)
-  .eq("assigned_salesman", user.id)
-  .limit(1);
+
+const { data: assignments, error: assignmentError } = await db
+  .from("customer_salesmen")
+  .select("customer_id")
+  .eq("salesman_id", user.id);
+
+if (assignmentError) {
+  alert("Could not check customer assignments: " + assignmentError.message);
+  return;
+}
+
+const customerIds = (assignments || []).map(a => a.customer_id);
+
+const { data: customers, error: lookupError } = customerIds.length
+  ? await db
+      .from("customer_accounts")
+      .select("id")
+      .eq("business_name", customerName)
+      .in("id", customerIds)
+      .limit(1)
+  : { data: [], error: null };
+
+
 
 if (lookupError) {
   alert("Could not find customer: " + lookupError.message);
