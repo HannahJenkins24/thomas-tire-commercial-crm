@@ -56,21 +56,21 @@
   <h2>Log Sales Activity</h2>
 
   <label>Customer / Prospect</label><br>
-  <input type="text" placeholder="Business name"><br><br>
+  <input type="text" id="customerName" placeholder="Business name"><br><br>
 
   <label>Contact Name</label><br>
-  <input type="text" placeholder="Contact person"><br><br>
+  <input type="text" id="contactName" placeholder="Contact person"><br><br>
 
   <label>Activity Type</label><br>
-  <select>
-    <option>In-Person Visit</option>
-    <option>Phone Call</option>
+  <select id="activityType">
+    <option value="in_person">In-Person Visit</option>
+<option value="phone">Phone Call</option>
   </select><br><br>
 
   <label>Discussion / Notes</label><br>
-  <textarea placeholder="What was discussed?"></textarea><br><br>
+  <textarea id="activityNotes" placeholder="What was discussed?"></textarea>
 
-  <button type="button" onclick="alert('Preview only. Database saving is not connected yet.')">
+  <button type="button" id="saveActivityButton">
     Save Activity
   </button>
 </section>
@@ -160,6 +160,58 @@ document.getElementById("logoutButton").addEventListener("click", async () => {
   document.getElementById("crmDashboard").style.display = "none";
   document.getElementById("loginForm").reset();
   loginMessage.textContent = "You have successfully logged out.";
+});
+  document.getElementById("saveActivityButton").addEventListener("click", async () => {
+  const { data: { user }, error: userError } = await db.auth.getUser();
+
+  if (userError || !user) {
+    alert("Please sign in before saving an activity.");
+    return;
+  }
+
+  const customerName = document.getElementById("customerName").value.trim();
+  const contactName = document.getElementById("contactName").value.trim();
+  const activityType = document.getElementById("activityType").value;
+  const notes = document.getElementById("activityNotes").value.trim();
+
+  if (!customerName) {
+    alert("Please enter a customer or prospect.");
+    return;
+  }
+
+ const { data: customers, error: lookupError } = await db
+  .from("customer_accounts")
+  .select("id")
+  .eq("business_name", customerName)
+  .eq("assigned_salesman", user.id)
+  .limit(1);
+
+if (lookupError) {
+  alert("Could not find customer: " + lookupError.message);
+  return;
+}
+
+if (!customers || customers.length === 0) {
+  alert("Customer not found. Please use an existing assigned customer for this test.");
+  return;
+}
+
+const { error } = await db.from("sales_activities").insert({
+  salesman_id: user.id,
+  customer_id: customers[0].id,
+  contact_name: contactName,
+  contact_time: new Date().toTimeString().slice(0, 8),
+  contact_method: activityType,
+  customer_type: "existing",
+  purpose_discussion: notes
+});
+
+  if (error) {
+    alert("Could not save activity: " + error.message);
+    return;
+  }
+
+  alert("Sales activity saved successfully!");
 });
 </script>
 
