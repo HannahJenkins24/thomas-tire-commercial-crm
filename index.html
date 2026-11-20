@@ -44,10 +44,35 @@
 
   <main>
     <h2>Sales Dashboard</h2>
-    <div class="card">
-      <h2>Daily Sales Activity</h2>
-      <p>Record customer visits and phone calls.</p>
-    </div>
+   
+<div class="card" onclick="document.getElementById('salesForm').hidden = false" style="cursor:pointer;">
+  <h2>Daily Sales Activity →</h2>
+  <p>Click here to record customer visits and phone calls.</p>
+</div>
+
+<section id="salesForm" class="card" hidden>
+  <h2>Log Sales Activity</h2>
+
+  <label>Customer / Prospect</label><br>
+  <input type="text" placeholder="Business name"><br><br>
+
+  <label>Contact Name</label><br>
+  <input type="text" placeholder="Contact person"><br><br>
+
+  <label>Activity Type</label><br>
+  <select>
+    <option>In-Person Visit</option>
+    <option>Phone Call</option>
+  </select><br><br>
+
+  <label>Discussion / Notes</label><br>
+  <textarea placeholder="What was discussed?"></textarea><br><br>
+
+  <button type="button" onclick="alert('Preview only. Database saving is not connected yet.')">
+    Save Activity
+  </button>
+</section>
+
     <div class="card">
       <h2>Customers & Prospects</h2>
       <p>Manage your assigned commercial accounts.</p>
