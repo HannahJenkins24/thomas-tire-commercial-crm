@@ -329,6 +329,95 @@ document.getElementById("refreshActivitiesButton")
     history.appendChild(table);
   });
 
+document.getElementById("loadManagementReportsButton")
+  .addEventListener("click", async () => {
+    const results = document.getElementById("managementReportsResults");
+    results.textContent = "Loading management reports...";
+
+    // Confirm the user is logged in
+    const { data: { user }, error: authError } =
+      await db.auth.getUser();
+
+    if (authError || !user) {
+      results.textContent = "Please log in first.";
+      return;
+    }
+
+    // Check manager permissions
+    const { data: profile, error: profileError } = await db
+      .from("sales_profiles")
+      .select("role")
+      .eq("id", user.id)
+      .single();
+
+    if (profileError || !profile || profile.role !== "gm") {
+      results.textContent = "Management access only.";
+      return;
+    }
+
+    // Retrieve sales activity records
+    const { data: activities, error } = await db
+      .from("sales_activities")
+      .select("salesman_id, contact_method, sales_profiles(full_name)")
+      .limit(1000);
+
+    if (error) {
+      results.textContent = "Error: " + error.message;
+      return;
+    }
+
+    const totals = {};
+
+    activities.forEach(activity => {
+      const name = activity.sales_profiles?.full_name || "Unknown";
+
+      if (!totals[name]) {
+        totals[name] = { visits: 0, calls: 0 };
+      }
+
+      if (activity.contact_method === "in_person") {
+        totals[name].visits++;
+      } else if (activity.contact_method === "phone") {
+        totals[name].calls++;
+      }
+    });
+
+    // Build the report
+    results.replaceChildren();
+
+    const heading = document.createElement("h3");
+    heading.textContent = "Sales Team Activity Summary";
+    results.appendChild(heading);
+
+    const table = document.createElement("table");
+    table.style.width = "100%";
+
+    const header = table.insertRow();
+    ["Salesman", "Visits", "Calls", "Total"].forEach(label => {
+      const th = document.createElement("th");
+      th.textContent = label;
+      header.appendChild(th);
+    });
+
+    Object.entries(totals).forEach(([name, counts]) => {
+      const row = table.insertRow();
+
+      [
+        name,
+        counts.visits,
+        counts.calls,
+        counts.visits + counts.calls
+      ].forEach(value => {
+        const cell = row.insertCell();
+        cell.textContent = value;
+        cell.style.padding = "8px";
+        cell.style.borderBottom = "1px solid #ddd";
+      });
+    });
+
+    results.appendChild(table);
+  });
+
 </script>
 
 
