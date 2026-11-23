@@ -244,6 +244,79 @@ const { error } = await db.from("sales_activities").insert({
 
   alert("Sales activity saved successfully!");
 });
+
+document.getElementById("refreshActivitiesButton")
+  .addEventListener("click", async () => {
+
+    const history = document.getElementById("activityHistory");
+    history.textContent = "Loading activities...";
+
+    const { data: { user }, error: userError } =
+      await db.auth.getUser();
+
+    if (userError || !user) {
+      history.textContent = "Please log in first.";
+      return;
+    }
+
+    const { data: activities, error } = await db
+      .from("sales_activities")
+      .select(`
+        activity_date,
+        contact_time,
+        contact_method,
+        contact_name,
+        purpose_discussion,
+        customer_accounts (business_name),
+        sales_profiles (full_name)
+      `)
+      .order("created_at", { ascending: false })
+      .limit(100);
+
+    if (error) {
+      history.textContent = "Error: " + error.message;
+      return;
+    }
+
+    history.replaceChildren();
+
+    if (!activities || activities.length === 0) {
+      history.textContent = "No activities found.";
+      return;
+    }
+
+    const table = document.createElement("table");
+    table.style.width = "100%";
+    table.style.marginTop = "15px";
+
+    const header = table.insertRow();
+    ["Date", "Salesman", "Customer", "Type", "Notes"]
+      .forEach(label => {
+        const th = document.createElement("th");
+        th.textContent = label;
+        header.appendChild(th);
+      });
+
+    activities.forEach(activity => {
+      const row = table.insertRow();
+
+      [
+        activity.activity_date,
+        activity.sales_profiles?.full_name || "",
+        activity.customer_accounts?.business_name || "",
+        activity.contact_method,
+        activity.purpose_discussion || ""
+      ].forEach(value => {
+        const cell = row.insertCell();
+        cell.textContent = value;
+        cell.style.padding = "8px";
+        cell.style.borderBottom = "1px solid #ddd";
+      });
+    });
+
+    history.appendChild(table);
+  });
+
 </script>
 
 
